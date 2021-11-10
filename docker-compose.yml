@@ -1,0 +1,13 @@
+version: '2'
+
+services:
+  league:
+    image: postgres
+    restart: on-failure
+    container_name: league
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=league
+    ports:
+      - 15432:5432

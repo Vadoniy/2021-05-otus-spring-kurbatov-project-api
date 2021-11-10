@@ -1,0 +1,118 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2021-10-28--0001
+      author: vadony
+      createTable:
+        tableName: PLAYER
+        columns:
+          - column:
+              name: id
+              type: bigint
+              autoIncrement: true
+              constraints:
+                nullable: false
+                primaryKey: true
+                primaryKeyName: pk_player
+          - column:
+              name: user_id
+              type: bigint
+              constraints:
+                nullable: false
+                unique: true
+          - column:
+              name: name
+              type: varchar(255)
+              constraints:
+                nullable: false
+          - column:
+              name: phone
+              type: varchar(11)
+              constraints:
+                nullable: false
+          - column:
+              name: player_number
+              type: int(10)
+          - column:
+              name: position
+              type: varchar(50)
+          - column:
+              name: is_disqualified
+              type: boolean
+          - column:
+              name: disqualified_till
+              type: date
+          - column:
+              name: state
+              type: varchar(20)
+  - changeSet:
+      id: 2021-11-01--0002
+      author: vadony
+      createTable:
+        tableName: TEAM
+        columns:
+          - column:
+              name: id
+              type: bigint
+              autoIncrement: true
+              constraints:
+                nullable: false
+                primaryKey: true
+                primaryKeyName: pk_team
+          - column:
+              name: team_name
+              type: varchar(255)
+              constraints:
+                nullable: false
+  - changeSet:
+      id: 2021-11-01--0003
+      author: vadony
+      createTable:
+        tableName: PLAYER_TEAM
+        columns:
+          - column:
+              name: team_id
+              type: bigint
+              constraints:
+                nullable: false
+          - column:
+              name: player_id
+              type: bigint
+              constraints:
+                nullable: false
+  - changeSet:
+      id: 2021-11-01--0004
+      author: vadony
+      createTable:
+        tableName: GAME
+        columns:
+          - column:
+              name: id
+              type: bigint
+              autoIncrement: true
+              constraints:
+                nullable: false
+                primaryKey: true
+                primaryKeyName: pk_game
+          - column:
+              name: game_date_time
+              type: timestamp
+              constraints:
+                nullable: false
+          - column:
+              name: team_capacity
+              type: int
+              constraints:
+                nullable: false
+          - column:
+              name: status
+              type: varchar(50)
+          - column:
+              name: team_a_id
+              type: bigint
+              constraints:
+                nullable: false
+          - column:
+              name: team_b_id
+              type: bigint
+              constraints:
+                nullable: false

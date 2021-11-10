@@ -1,0 +1,21 @@
+business:
+  default:
+    team-name-a: Чёрные
+    team-name-b: Белые
+    capacity: 6
+
+
+spring:
+  datasource:
+    username: postgres
+    password: postgres
+    driverClassName: org.postgresql.Driver
+    properties.hibernate.jdbc.lob.non_contextual_creation: true
+    url: jdbc:postgresql://192.168.99.100:15432/league
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+  liquibase:
+    change-log: db\changelog\db.changelog-master.yml
+  mvc.hiddenmethod.filter.enabled: true
