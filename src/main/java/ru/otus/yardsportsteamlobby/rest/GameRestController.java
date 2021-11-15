@@ -2,13 +2,14 @@ package ru.otus.yardsportsteamlobby.rest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.otus.yardsportsteamlobby.configuration.BusinessConfiguration;
 import ru.otus.yardsportsteamlobby.domain.Game;
 import ru.otus.yardsportsteamlobby.domain.Team;
+import ru.otus.yardsportsteamlobby.dto.GameDto;
 import ru.otus.yardsportsteamlobby.rest.request.game.CreateGameRequest;
 import ru.otus.yardsportsteamlobby.rest.response.game.ListGameResponse;
-import ru.otus.yardsportsteamlobby.rest.response.game.SignUpForGameResponse;
 import ru.otus.yardsportsteamlobby.service.GameService;
 
 import java.util.Optional;
@@ -48,7 +49,7 @@ public class GameRestController {
     }
 
     @PostMapping("/game/{gameId}/team/{teamId}/player/{userId}")
-    public SignUpForGameResponse signUpForGame(@PathVariable long gameId, @PathVariable long teamId, @PathVariable long userId) {
+    public ResponseEntity<GameDto> signUpForGame(@PathVariable long gameId, @PathVariable long teamId, @PathVariable long userId) {
         return gameService.signUpForGame(gameId, teamId, userId);
     }
 }

@@ -116,3 +116,35 @@ databaseChangeLog:
               type: bigint
               constraints:
                 nullable: false
+  - changeSet:
+      id: 2021-11-15--0005
+      author: vadony
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames:  team_id
+            baseTableName:  PLAYER_TEAM
+            constraintName:  fk_player_team_team
+            onDelete:  CASCADE
+            referencedColumnNames:  id
+            referencedTableName:  TEAM
+        - addForeignKeyConstraint:
+            baseColumnNames:  player_id
+            baseTableName:  PLAYER_TEAM
+            constraintName:  fk_player_team_player
+            onDelete:  CASCADE
+            referencedColumnNames:  id
+            referencedTableName:  PLAYER
+        - addForeignKeyConstraint:
+            baseColumnNames:  team_a_id
+            baseTableName:  GAME
+            constraintName:  fk_game_team_a
+            onDelete:  CASCADE
+            referencedColumnNames:  id
+            referencedTableName:  TEAM
+        - addForeignKeyConstraint:
+            baseColumnNames:  team_b_id
+            baseTableName:  GAME
+            constraintName:  fk_game_team_b
+            onDelete:  CASCADE
+            referencedColumnNames:  id
+            referencedTableName:  TEAM
