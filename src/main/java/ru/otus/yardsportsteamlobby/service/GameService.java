@@ -51,6 +51,9 @@ public class GameService {
         final var selectedGameCapacity = selectedGame.map(Game::getTeamCapacity).orElse(businessConfiguration.getCapacity());
         final var otherTeam = selectOtherTeamFromGame(selectedGame.orElseThrow(), teamId);
         final var responseGameDto = new GameDto();
+        if (selectedPlayer == null) {
+            return new ResponseEntity<>(responseGameDto, HttpStatus.MULTI_STATUS);
+        }
         if (selectedTeam.map(Team::getLineUp).map(Set::size).orElse(0) >= selectedGameCapacity
                 && selectedTeam.map(Team::getLineUp).map(players -> !players.contains(selectedPlayer)).orElse(Boolean.TRUE)) {
             if (otherTeam.getLineUp().size() <= selectedGameCapacity) {
