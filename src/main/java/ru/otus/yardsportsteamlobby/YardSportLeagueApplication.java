@@ -15,7 +15,6 @@ public class YardSportLeagueApplication {
 		SpringApplication.run(YardSportLeagueApplication.class, args);
 	}
 
-
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();

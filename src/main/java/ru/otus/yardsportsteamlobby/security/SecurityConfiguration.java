@@ -22,13 +22,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .disable()
-//                .and()
                 .httpBasic()
                 .and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST,"/player/new").permitAll()
-                .antMatchers(HttpMethod.POST,"/game/new").hasRole(PlayerRole.ADMIN.name())
-                .antMatchers("/player/**").hasRole(PlayerRole.USER.name())
+                .antMatchers(HttpMethod.POST,"/game/new").hasAuthority(PlayerRole.ADMIN.name())
+                .antMatchers("/player/**").hasAuthority(PlayerRole.USER.name())
                 .anyRequest().authenticated();
     }
 
