@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import ru.otus.yardsportsteamlobby.enums.PlayerPosition;
+import ru.otus.yardsportsteamlobby.enums.PlayerRole;
 import ru.otus.yardsportsteamlobby.enums.PlayerState;
 
 import javax.persistence.*;
@@ -42,11 +43,14 @@ public class Player {
     @Enumerated(EnumType.STRING)
     private PlayerPosition position;
 
-    private boolean isDisqualified = false;
+    private Boolean isDisqualified = Boolean.FALSE;
 
     private LocalDate disqualifiedTill;
 
     @Enumerated(EnumType.STRING)
     private PlayerState state = PlayerState.ACTIVE;
+
+    @Enumerated(EnumType.STRING)
+    private PlayerRole role = PlayerRole.USER;
 }
 
