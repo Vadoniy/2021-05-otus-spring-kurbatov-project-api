@@ -10,7 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.otus.yardsportsteamlobby.domain.MyUser;
-import ru.otus.yardsportsteamlobby.enums.PlayerRole;
+import ru.otus.yardsportsteamlobby.enums.PlayerAuthority;
 import ru.otus.yardsportsteamlobby.repository.UserRepository;
 
 @Service
@@ -28,13 +28,13 @@ public class CustomUserDetailsService implements UserDetailsService {
                         String.valueOf(u.getUserId()), new BCryptPasswordEncoder().encode(String.valueOf(u.getUserId())),
                         AuthorityUtils.createAuthorityList(u.getRole().name())))
                 .orElse(new User(userId, passwordEncoder.encode(userId),
-                        AuthorityUtils.createAuthorityList(PlayerRole.NEW.name())));
+                        AuthorityUtils.createAuthorityList(PlayerAuthority.NEW.name())));
     }
 
     public String loadUsersRole(Long userId) {
         return userRepository.findByUserId(userId)
                 .map(MyUser::getRole)
-                .map(PlayerRole::name)
-                .orElse(PlayerRole.NEW.name());
+                .map(PlayerAuthority::name)
+                .orElseThrow(() -> new UsernameNotFoundException("User with userId " + userId + " is not presented in database."));
     }
 }

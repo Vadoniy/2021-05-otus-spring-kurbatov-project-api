@@ -2,9 +2,11 @@ package ru.otus.yardsportsteamlobby.rest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import ru.otus.yardsportsteamlobby.enums.PlayerAuthority;
 import ru.otus.yardsportsteamlobby.service.security.CustomUserDetailsService;
 
 @RestController
@@ -16,6 +18,10 @@ public class UserController {
 
     @GetMapping("/user/role/{userId}")
     public String getUsersRole(@PathVariable long userId) {
-        return customUserDetailsService.loadUsersRole(userId);
+        try {
+            return customUserDetailsService.loadUsersRole(userId);
+        } catch (UsernameNotFoundException ex) {
+            return PlayerAuthority.NEW.name();
+        }
     }
 }

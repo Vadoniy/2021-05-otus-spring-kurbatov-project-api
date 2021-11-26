@@ -2,7 +2,7 @@ package ru.otus.yardsportsteamlobby.domain;
 
 import lombok.*;
 import lombok.experimental.Accessors;
-import ru.otus.yardsportsteamlobby.enums.PlayerRole;
+import ru.otus.yardsportsteamlobby.enums.PlayerAuthority;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -27,7 +27,7 @@ public class MyUser {
     private char[] password;
 
     @Enumerated(EnumType.STRING)
-    private PlayerRole role;
+    private PlayerAuthority role;
 }
 
 

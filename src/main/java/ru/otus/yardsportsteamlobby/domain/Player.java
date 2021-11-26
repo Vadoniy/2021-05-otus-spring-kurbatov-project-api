@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import ru.otus.yardsportsteamlobby.enums.PlayerPosition;
-import ru.otus.yardsportsteamlobby.enums.PlayerRole;
+import ru.otus.yardsportsteamlobby.enums.PlayerAuthority;
 import ru.otus.yardsportsteamlobby.enums.PlayerState;
 
 import javax.persistence.*;
@@ -51,6 +51,6 @@ public class Player {
     private PlayerState state = PlayerState.ACTIVE;
 
     @Enumerated(EnumType.STRING)
-    private PlayerRole role = PlayerRole.USER;
+    private PlayerAuthority role = PlayerAuthority.USER;
 }
 

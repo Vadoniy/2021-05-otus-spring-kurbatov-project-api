@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.otus.yardsportsteamlobby.domain.MyUser;
 import ru.otus.yardsportsteamlobby.domain.Player;
-import ru.otus.yardsportsteamlobby.enums.PlayerRole;
+import ru.otus.yardsportsteamlobby.enums.PlayerAuthority;
 import ru.otus.yardsportsteamlobby.repository.PlayerRepository;
 import ru.otus.yardsportsteamlobby.repository.UserRepository;
 
@@ -52,7 +52,7 @@ public class PlayerService {
             return userRepository.save(new MyUser()
                     .setUserId(userId)
                     .setPassword(String.valueOf(userId).toCharArray())
-                    .setRole(PlayerRole.USER));
+                    .setRole(PlayerAuthority.USER));
         }
     }
 }

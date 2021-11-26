@@ -1,6 +1,6 @@
 package ru.otus.yardsportsteamlobby.enums;
 
-public enum PlayerRole {
+public enum PlayerAuthority {
 
     ADMIN,
 

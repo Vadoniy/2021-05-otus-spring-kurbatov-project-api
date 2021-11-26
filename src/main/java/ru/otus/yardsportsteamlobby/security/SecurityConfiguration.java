@@ -7,14 +7,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import ru.otus.yardsportsteamlobby.enums.PlayerRole;
-import ru.otus.yardsportsteamlobby.service.security.CustomUserDetailsService;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import ru.otus.yardsportsteamlobby.enums.PlayerAuthority;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserDetailsService customUserDetailsService;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
@@ -25,9 +25,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .httpBasic()
                 .and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST,"/player/new").permitAll()
-                .antMatchers(HttpMethod.POST,"/game/new").hasAuthority(PlayerRole.ADMIN.name())
-                .antMatchers("/player/**").hasAuthority(PlayerRole.USER.name())
+                .antMatchers(HttpMethod.POST, "/player/new").permitAll()
+                .antMatchers(HttpMethod.POST, "/game/new").hasAuthority(PlayerAuthority.ADMIN.name())
+                .antMatchers("/player/**").hasAuthority(PlayerAuthority.USER.name())
                 .anyRequest().authenticated();
     }
 
