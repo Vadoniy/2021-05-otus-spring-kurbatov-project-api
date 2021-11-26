@@ -4,7 +4,6 @@ business:
     team-name-b: Белые
     capacity: 6
 
-
 spring:
   datasource:
     username: postgres
@@ -24,3 +23,11 @@ spring:
       root: debug
       org.springframework.security: DEBUG
       org.springframework: debug
+
+hystrix:
+  command:
+    gameServiceTimeout:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 1000
