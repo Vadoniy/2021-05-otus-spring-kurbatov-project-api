@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.otus.yardsportsteamlobby.domain.Player;
+import ru.otus.yardsportsteamlobby.repository.UserRepository;
 import ru.otus.yardsportsteamlobby.rest.request.player.CreatePlayerRequest;
 import ru.otus.yardsportsteamlobby.service.PlayerService;
 
@@ -12,6 +13,8 @@ import ru.otus.yardsportsteamlobby.service.PlayerService;
 public class PlayerRestController {
 
     private final PlayerService playerService;
+
+    private final UserRepository userRepository;
 
     @PostMapping("/player/new")
     public String registerPlayer(@Validated @RequestBody CreatePlayerRequest createPlayerRequest) {

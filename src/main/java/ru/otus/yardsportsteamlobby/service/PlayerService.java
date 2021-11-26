@@ -2,8 +2,11 @@ package ru.otus.yardsportsteamlobby.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.otus.yardsportsteamlobby.domain.MyUser;
 import ru.otus.yardsportsteamlobby.domain.Player;
+import ru.otus.yardsportsteamlobby.enums.PlayerAuthority;
 import ru.otus.yardsportsteamlobby.repository.PlayerRepository;
+import ru.otus.yardsportsteamlobby.repository.UserRepository;
 
 import javax.transaction.Transactional;
 
@@ -13,18 +16,22 @@ public class PlayerService {
 
     private final PlayerRepository playerRepository;
 
+    private final UserRepository userRepository;
+
     @Transactional
     public Player savePlayer(Player player) {
+        final Player p;
         if (playerRepository.existsByUserId(player.getUserId())) {
-            final var p = playerRepository.findOneByUserId(player.getUserId());
-            p.setName(player.getName())
+            p = playerRepository.findOneByUserId(player.getUserId())
+                    .setName(player.getName())
                     .setPhone(player.getPhone())
                     .setPlayerNumber(player.getPlayerNumber())
                     .setPosition(player.getPosition());
-            return playerRepository.save(p);
         } else {
-            return playerRepository.save(player);
+            p = playerRepository.save(player);
         }
+        saveUser(p.getUserId());
+        return p;
     }
 
     @Transactional
@@ -34,6 +41,18 @@ public class PlayerService {
             return "Игрок с userId " + userId + " был удалён.";
         } else {
             return "Игрок с userId " + userId + " не найден в списке игроков.";
+        }
+    }
+
+    private MyUser saveUser(Long userId) {
+        if (userRepository.existsByUserId(userId)) {
+            return userRepository.findByUserId(userId)
+                    .orElseThrow();
+        } else {
+            return userRepository.save(new MyUser()
+                    .setUserId(userId)
+                    .setPassword(String.valueOf(userId).toCharArray())
+                    .setRole(PlayerAuthority.USER));
         }
     }
 }
