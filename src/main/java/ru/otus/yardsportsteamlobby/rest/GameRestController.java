@@ -17,7 +17,6 @@ import ru.otus.yardsportsteamlobby.service.GameService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,12 +33,7 @@ public class GameRestController {
 
     @PostMapping("/game/new")
     @HystrixCommand(commandKey = "gameServiceTimeout", defaultFallback = "gameNotCreated")
-    public ResponseEntity<String> createGame(@RequestBody CreateGameRequest createGameRequest) throws InterruptedException {
-        final var tt = new Random().nextInt(10);
-        if (tt%2==0) {
-            log.info("COUNTER {}", new Random().nextInt(10));
-            Thread.sleep(1500);
-        }
+    public ResponseEntity<String> createGame(@RequestBody CreateGameRequest createGameRequest) {
         final var teamNameA = Optional.ofNullable(createGameRequest.getTeamNameA())
                 .orElse(businessConfiguration.getTeamNameA());
         final var teamNameB = Optional.ofNullable(createGameRequest.getTeamNameB())
@@ -75,17 +69,20 @@ public class GameRestController {
     }
 
     private ResponseEntity<String> gameNotCreated() {
+        log.info("Hystrix default response gameNotCreated");
         final var response = "Game was not created, try again later.";
         return new ResponseEntity<>(response, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
     }
 
     private ListGameResponse cachedGamesList() {
+        log.info("Hystrix default response cachedGamesList");
         final var response = new ListGameResponse();
         response.setGames(cachedGameList);
         return response;
     }
 
     private ResponseEntity<GameDto> cachedGameDto() {
+        log.info("Hystrix default response cachedGameDto");
         return new ResponseEntity<>(cachedGameDto, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
     }
 }

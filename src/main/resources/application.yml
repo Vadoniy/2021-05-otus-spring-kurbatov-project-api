@@ -27,7 +27,8 @@ spring:
 hystrix:
   command:
     gameServiceTimeout:
-      execution:
-        isolation:
-          thread:
-            timeoutInMilliseconds: 1000
+      execution.isolation.thread.timeoutInMilliseconds: 3000
+    playerServiceTimeout:
+      execution.isolation.thread.timeoutInMilliseconds: 3000
+    userControllerTimeout:
+      execution.isolation.thread.timeoutInMilliseconds: 3000
