@@ -12,12 +12,13 @@ import ru.otus.yardsportsteamlobby.configuration.BusinessConfiguration;
 import ru.otus.yardsportsteamlobby.domain.Game;
 import ru.otus.yardsportsteamlobby.domain.Team;
 import ru.otus.yardsportsteamlobby.dto.GameDto;
+import ru.otus.yardsportsteamlobby.enums.GameStatus;
 import ru.otus.yardsportsteamlobby.repository.GameRepository;
 import ru.otus.yardsportsteamlobby.repository.PlayerRepository;
 import ru.otus.yardsportsteamlobby.repository.TeamRepository;
 import ru.otus.yardsportsteamlobby.rest.response.game.ListGameResponse;
 
-import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -40,25 +41,25 @@ public class GameService {
 
     private GameDto cachedGameDto = new GameDto();
 
-    @Transactional
-    @HystrixCommand(commandKey = "gameServiceTimeout", defaultFallback = "gameNotCreated")
-    public Game saveGame(Game game) {
+    @HystrixCommand(commandKey = "gameServiceTimeout", fallbackMethod = "gameNotCreated")
+    public Game saveGame(LocalDateTime gameDateTime, Game game) {
         return gameRepository.save(game);
     }
 
-    @HystrixCommand(commandKey = "gameServiceTimeout", defaultFallback = "cachedGamesList")
+    @HystrixCommand(commandKey = "gameServiceTimeout", fallbackMethod = "cachedGamesList")
     public ListGameResponse gameList(int howManyGames) {
         final var pageRequest = PageRequest.of(0, howManyGames, Sort.Direction.ASC, "gameDateTime");
-        final var lastGames = gameRepository.findAll(pageRequest).stream()
+        final var lastGames = gameRepository.findAllByStatus(GameStatus.EXPECTED, pageRequest).stream()
                 .map(GameDto::toDto)
                 .collect(Collectors.toList());
         cachedGameList = lastGames;
         return new ListGameResponse(lastGames);
     }
 
-    @HystrixCommand(commandKey = "gameServiceTimeout", defaultFallback = "cachedGameDto")
+    @HystrixCommand(commandKey = "gameServiceTimeout", fallbackMethod = "cachedGameDto")
     public ResponseEntity<GameDto> signUpForGame(long gameId, long teamId, long userId) {
         final var selectedGame = gameRepository.findById(gameId);
+        cachedGameDto = selectedGame.map(GameDto::toDto).orElse(new GameDto());
         final var selectedTeam = teamRepository.findById(teamId);
         final var selectedPlayer = playerRepository.findOneByUserId(userId);
         final var selectedGameCapacity = selectedGame.map(Game::getTeamCapacity).orElse(businessConfiguration.getCapacity());
@@ -99,21 +100,21 @@ public class GameService {
         }
     }
 
-    private ResponseEntity<String> gameNotCreated() {
+    private Game gameNotCreated(LocalDateTime gameDateTime, Game game) {
         log.info("Hystrix default response gameNotCreated");
-        final var response = "Game was not created, try again later.";
-        return new ResponseEntity<>(response, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
+        log.info("Game was not created on {}, try again later.", gameDateTime);
+        return new Game();
     }
 
-    private ListGameResponse cachedGamesList() {
+    private ListGameResponse cachedGamesList(int howManyGames) {
         log.info("Hystrix default response cachedGamesList");
         final var response = new ListGameResponse();
         response.setGames(cachedGameList);
         return response;
     }
 
-    private ResponseEntity<GameDto> cachedGameDto() {
-        log.info("Hystrix default response cachedGameDto");
-        return new ResponseEntity<>(cachedGameDto, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
+    private ResponseEntity<GameDto> cachedGameDto(long gameId, long teamId, long userId) {
+        log.info("Hystrix default response cachedGameDto: gameId {}, teamId {}, userId {}", gameId, teamId, userId);
+        return new ResponseEntity<>(cachedGameDto, HttpStatus.OK);
     }
 }

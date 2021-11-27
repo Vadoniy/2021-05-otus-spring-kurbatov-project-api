@@ -10,7 +10,8 @@ import javax.validation.constraints.NotNull;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = "userId")
+//@EqualsAndHashCode(of = "id")
 @Accessors(chain = true)
 @Entity
 @Table(name = "MY_USER")

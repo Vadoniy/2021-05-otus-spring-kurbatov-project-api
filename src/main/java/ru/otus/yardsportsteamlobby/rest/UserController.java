@@ -6,16 +6,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import ru.otus.yardsportsteamlobby.service.security.CustomUserDetailsService;
+import ru.otus.yardsportsteamlobby.service.MyUserService;
 
 @RestController
 @RequiredArgsConstructor
 public class UserController {
 
-    private final CustomUserDetailsService customUserDetailsService;
+    private final MyUserService myUserService;
 
     @GetMapping("/user/role/{userId}")
     public ResponseEntity<String> getUsersRole(@PathVariable long userId) {
-        return new ResponseEntity<>(customUserDetailsService.loadUsersRole(userId), HttpStatus.OK);
+        return new ResponseEntity<>(myUserService.loadUsersRole(userId), HttpStatus.OK);
     }
 }

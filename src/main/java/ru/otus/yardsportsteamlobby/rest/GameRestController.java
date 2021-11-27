@@ -8,10 +8,12 @@ import ru.otus.yardsportsteamlobby.configuration.BusinessConfiguration;
 import ru.otus.yardsportsteamlobby.domain.Game;
 import ru.otus.yardsportsteamlobby.domain.Team;
 import ru.otus.yardsportsteamlobby.dto.GameDto;
+import ru.otus.yardsportsteamlobby.enums.GameStatus;
 import ru.otus.yardsportsteamlobby.rest.request.game.CreateGameRequest;
 import ru.otus.yardsportsteamlobby.rest.response.game.ListGameResponse;
 import ru.otus.yardsportsteamlobby.service.GameService;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -34,10 +36,11 @@ public class GameRestController {
                 .setTeamName(teamNameB);
         final var game = new Game()
                 .setGameDateTime(createGameRequest.getGameDateTime())
+                .setStatus(LocalDateTime.now().isBefore(createGameRequest.getGameDateTime()) ? GameStatus.EXPECTED : GameStatus.PASSED)
                 .setTeamCapacity(createGameRequest.getTeamCapacity())
                 .setTeamA(teamA)
                 .setTeamB(teamB);
-        final var gameSaved = gameService.saveGame(game);
+        final var gameSaved = gameService.saveGame(createGameRequest.getGameDateTime(), game);
         final var response = "Game is created! Date " + gameSaved.getGameDateTime().toLocalDate() + ", time " + gameSaved.getGameDateTime().toLocalTime()
                 + ", teams: " + gameSaved.getTeamA().getTeamName() + " - " + gameSaved.getTeamB().getTeamName();
         return new ResponseEntity<>(response, HttpStatus.OK);

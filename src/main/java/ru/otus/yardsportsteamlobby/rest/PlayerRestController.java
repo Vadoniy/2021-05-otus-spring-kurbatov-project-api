@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.otus.yardsportsteamlobby.domain.Player;
-import ru.otus.yardsportsteamlobby.repository.UserRepository;
 import ru.otus.yardsportsteamlobby.rest.request.player.CreatePlayerRequest;
+import ru.otus.yardsportsteamlobby.service.MyUserService;
 import ru.otus.yardsportsteamlobby.service.PlayerService;
 
 @RestController
@@ -16,7 +16,7 @@ public class PlayerRestController {
 
     private final PlayerService playerService;
 
-    private final UserRepository userRepository;
+    private final MyUserService myUserService;
 
     @PostMapping("/player/new")
     public ResponseEntity<String> registerPlayer(@Validated @RequestBody CreatePlayerRequest createPlayerRequest) {
@@ -27,7 +27,7 @@ public class PlayerRestController {
                 .setPlayerNumber(createPlayerRequest.getNumber())
                 .setPosition(createPlayerRequest.getPosition());
         final var savedPlayer = playerService.savePlayer(player);
-        final var response = "Player " + savedPlayer.getName() + " is registered with id " + savedPlayer.getUserId();
+        final var response = myUserService.loadUsersRole(savedPlayer.getUserId());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

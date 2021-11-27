@@ -3,8 +3,6 @@ package ru.otus.yardsportsteamlobby.service;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.otus.yardsportsteamlobby.domain.MyUser;
 import ru.otus.yardsportsteamlobby.domain.Player;
@@ -24,31 +22,29 @@ public class PlayerService {
     private final UserRepository userRepository;
 
     @Transactional
-    @HystrixCommand(commandKey = "playerServiceTimeout", defaultFallback = "notRegistered")
+    @HystrixCommand(commandKey = "playerServiceTimeout", fallbackMethod = "notRegistered")
     public Player savePlayer(Player player) {
-        final Player p;
         if (playerRepository.existsByUserId(player.getUserId())) {
-            p = playerRepository.findOneByUserId(player.getUserId())
+            player = playerRepository.findOneByUserId(player.getUserId())
                     .setName(player.getName())
                     .setPhone(player.getPhone())
                     .setPlayerNumber(player.getPlayerNumber())
                     .setPosition(player.getPosition());
-        } else {
-            p = playerRepository.save(player);
         }
-        saveUser(p.getUserId());
-        return p;
+        player = playerRepository.save(player);
+        saveUser(player.getUserId());
+        return player;
     }
 
-    @Transactional
-    @HystrixCommand(commandKey = "playerServiceTimeout", defaultFallback = "notDeleted")
+    @HystrixCommand(commandKey = "playerServiceTimeout", fallbackMethod = "notDeleted")
     public String deletePlayer(Long userId) {
         if (playerRepository.existsByUserId(userId)) {
             playerRepository.deleteByUserId(userId);
-            return "Игрок с userId " + userId + " был удалён.";
+            log.info("Игрок с userId " + userId + " был удалён.");
         } else {
-            return "Игрок с userId " + userId + " не найден в списке игроков.";
+            log.info("Игрок с userId " + userId + " не найден в списке игроков.");
         }
+        return PlayerAuthority.NEW.name();
     }
 
     private MyUser saveUser(Long userId) {
@@ -63,15 +59,13 @@ public class PlayerService {
         }
     }
 
-    private ResponseEntity<String> notDeleted() {
-        log.info("Hystrix default response notDeleted");
-        final var response = "Player was not deleted, try again later.";
-        return new ResponseEntity<>(response, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
+    private String notDeleted(Long userId) {
+        log.info("Hystrix default response notDeleted for userId {}", userId);
+        return PlayerAuthority.USER.name();
     }
 
-    private ResponseEntity<String> notRegistered() {
-        log.info("Hystrix default response notRegistered");
-        final var response = "Player was not registered, try again later.";
-        return new ResponseEntity<>(response, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
+    private Player notRegistered(Player player) {
+        log.info("Hystrix default response notRegistered for userId {}", player.getUserId());
+        return new Player();
     }
 }

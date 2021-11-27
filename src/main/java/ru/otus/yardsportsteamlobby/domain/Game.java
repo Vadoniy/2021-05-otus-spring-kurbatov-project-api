@@ -33,7 +33,7 @@ public class Game {
     private Integer teamCapacity;
 
     @Enumerated(EnumType.STRING)
-    private GameStatus status;
+    private GameStatus status = GameStatus.EXPECTED;
 
     @NotNull
     @JsonFormat(pattern = GAME_DATE_TIME_FORMAT)
