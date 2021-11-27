@@ -1,6 +1,8 @@
 package ru.otus.yardsportsteamlobby.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -16,11 +18,14 @@ import ru.otus.yardsportsteamlobby.repository.TeamRepository;
 import ru.otus.yardsportsteamlobby.rest.response.game.ListGameResponse;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GameService {
 
     private final BusinessConfiguration businessConfiguration;
@@ -31,19 +36,27 @@ public class GameService {
 
     private final TeamRepository teamRepository;
 
+    private List<GameDto> cachedGameList = new ArrayList<>(0);
+
+    private GameDto cachedGameDto = new GameDto();
+
     @Transactional
+    @HystrixCommand(commandKey = "gameServiceTimeout", defaultFallback = "gameNotCreated")
     public Game saveGame(Game game) {
         return gameRepository.save(game);
     }
 
+    @HystrixCommand(commandKey = "gameServiceTimeout", defaultFallback = "cachedGamesList")
     public ListGameResponse gameList(int howManyGames) {
         final var pageRequest = PageRequest.of(0, howManyGames, Sort.Direction.ASC, "gameDateTime");
         final var lastGames = gameRepository.findAll(pageRequest).stream()
                 .map(GameDto::toDto)
                 .collect(Collectors.toList());
+        cachedGameList = lastGames;
         return new ListGameResponse(lastGames);
     }
 
+    @HystrixCommand(commandKey = "gameServiceTimeout", defaultFallback = "cachedGameDto")
     public ResponseEntity<GameDto> signUpForGame(long gameId, long teamId, long userId) {
         final var selectedGame = gameRepository.findById(gameId);
         final var selectedTeam = teamRepository.findById(teamId);
@@ -84,5 +97,23 @@ public class GameService {
         } else {
             return game.getTeamA();
         }
+    }
+
+    private ResponseEntity<String> gameNotCreated() {
+        log.info("Hystrix default response gameNotCreated");
+        final var response = "Game was not created, try again later.";
+        return new ResponseEntity<>(response, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
+    }
+
+    private ListGameResponse cachedGamesList() {
+        log.info("Hystrix default response cachedGamesList");
+        final var response = new ListGameResponse();
+        response.setGames(cachedGameList);
+        return response;
+    }
+
+    private ResponseEntity<GameDto> cachedGameDto() {
+        log.info("Hystrix default response cachedGameDto");
+        return new ResponseEntity<>(cachedGameDto, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
     }
 }

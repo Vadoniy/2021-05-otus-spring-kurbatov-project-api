@@ -1,8 +1,6 @@
 package ru.otus.yardsportsteamlobby.rest;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,25 +12,17 @@ import ru.otus.yardsportsteamlobby.rest.request.game.CreateGameRequest;
 import ru.otus.yardsportsteamlobby.rest.response.game.ListGameResponse;
 import ru.otus.yardsportsteamlobby.service.GameService;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@Slf4j
 public class GameRestController {
 
     private final BusinessConfiguration businessConfiguration;
 
     private final GameService gameService;
 
-    private List<GameDto> cachedGameList = new ArrayList<>(0);
-
-    private GameDto cachedGameDto = new GameDto();
-
     @PostMapping("/game/new")
-    @HystrixCommand(commandKey = "gameServiceTimeout", defaultFallback = "gameNotCreated")
     public ResponseEntity<String> createGame(@RequestBody CreateGameRequest createGameRequest) {
         final var teamNameA = Optional.ofNullable(createGameRequest.getTeamNameA())
                 .orElse(businessConfiguration.getTeamNameA());
@@ -54,35 +44,12 @@ public class GameRestController {
     }
 
     @GetMapping("/game/list/{amountOfGames}")
-    @HystrixCommand(commandKey = "gameServiceTimeout", defaultFallback = "cachedGamesList")
     public ListGameResponse getGameList(@PathVariable int amountOfGames) {
-        cachedGameList = Optional.ofNullable(gameService.gameList(amountOfGames))
-                .map(ListGameResponse::getGames)
-                .orElse(new ArrayList<>(0));
         return gameService.gameList(amountOfGames);
     }
 
     @PostMapping("/game/{gameId}/team/{teamId}/player/{userId}")
-    @HystrixCommand(commandKey = "gameServiceTimeout", defaultFallback = "cachedGameDto")
     public ResponseEntity<GameDto> signUpForGame(@PathVariable long gameId, @PathVariable long teamId, @PathVariable long userId) {
         return gameService.signUpForGame(gameId, teamId, userId);
-    }
-
-    private ResponseEntity<String> gameNotCreated() {
-        log.info("Hystrix default response gameNotCreated");
-        final var response = "Game was not created, try again later.";
-        return new ResponseEntity<>(response, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
-    }
-
-    private ListGameResponse cachedGamesList() {
-        log.info("Hystrix default response cachedGamesList");
-        final var response = new ListGameResponse();
-        response.setGames(cachedGameList);
-        return response;
-    }
-
-    private ResponseEntity<GameDto> cachedGameDto() {
-        log.info("Hystrix default response cachedGameDto");
-        return new ResponseEntity<>(cachedGameDto, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
     }
 }

@@ -1,6 +1,8 @@
 package ru.otus.yardsportsteamlobby.service.security;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +17,7 @@ import ru.otus.yardsportsteamlobby.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
@@ -31,10 +34,16 @@ public class CustomUserDetailsService implements UserDetailsService {
                         AuthorityUtils.createAuthorityList(PlayerAuthority.NEW.name())));
     }
 
+    @HystrixCommand(commandKey = "userControllerTimeout", defaultFallback = "defaultRole")
     public String loadUsersRole(Long userId) {
         return userRepository.findByUserId(userId)
                 .map(MyUser::getRole)
                 .map(PlayerAuthority::name)
                 .orElseThrow(() -> new UsernameNotFoundException("User with userId " + userId + " is not presented in database."));
+    }
+
+    private String defaultRole() {
+        log.info("Hystrix default response defaultRole");
+        return PlayerAuthority.NEW.name();
     }
 }

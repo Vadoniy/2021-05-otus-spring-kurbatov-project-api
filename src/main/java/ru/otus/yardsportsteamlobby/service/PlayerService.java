@@ -1,6 +1,10 @@
 package ru.otus.yardsportsteamlobby.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.otus.yardsportsteamlobby.domain.MyUser;
 import ru.otus.yardsportsteamlobby.domain.Player;
@@ -12,6 +16,7 @@ import javax.transaction.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
@@ -19,6 +24,7 @@ public class PlayerService {
     private final UserRepository userRepository;
 
     @Transactional
+    @HystrixCommand(commandKey = "playerServiceTimeout", defaultFallback = "notRegistered")
     public Player savePlayer(Player player) {
         final Player p;
         if (playerRepository.existsByUserId(player.getUserId())) {
@@ -35,6 +41,7 @@ public class PlayerService {
     }
 
     @Transactional
+    @HystrixCommand(commandKey = "playerServiceTimeout", defaultFallback = "notDeleted")
     public String deletePlayer(Long userId) {
         if (playerRepository.existsByUserId(userId)) {
             playerRepository.deleteByUserId(userId);
@@ -54,5 +61,17 @@ public class PlayerService {
                     .setPassword(String.valueOf(userId).toCharArray())
                     .setRole(PlayerAuthority.USER));
         }
+    }
+
+    private ResponseEntity<String> notDeleted() {
+        log.info("Hystrix default response notDeleted");
+        final var response = "Player was not deleted, try again later.";
+        return new ResponseEntity<>(response, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
+    }
+
+    private ResponseEntity<String> notRegistered() {
+        log.info("Hystrix default response notRegistered");
+        final var response = "Player was not registered, try again later.";
+        return new ResponseEntity<>(response, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
     }
 }
