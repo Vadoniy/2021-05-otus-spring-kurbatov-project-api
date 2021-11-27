@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import ru.otus.yardsportsteamlobby.configuration.BusinessConfiguration;
 import ru.otus.yardsportsteamlobby.domain.Game;
 import ru.otus.yardsportsteamlobby.domain.Team;
@@ -53,6 +54,10 @@ public class GameRestController {
 
     @PostMapping("/game/{gameId}/team/{teamId}/player/{userId}")
     public ResponseEntity<GameDto> signUpForGame(@PathVariable long gameId, @PathVariable long teamId, @PathVariable long userId) {
-        return gameService.signUpForGame(gameId, teamId, userId);
+        try {
+            return new ResponseEntity<>(gameService.signUpForGame(gameId, teamId, userId), HttpStatus.OK);
+        } catch (HttpClientErrorException e) {
+            return new ResponseEntity<>(gameService.getCachedGameDto(), e.getStatusCode());
+        }
     }
 }
