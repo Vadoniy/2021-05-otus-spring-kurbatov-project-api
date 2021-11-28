@@ -1,6 +1,5 @@
 package ru.otus.yardsportsteamlobby.service;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -16,10 +15,8 @@ import ru.otus.yardsportsteamlobby.enums.GameStatus;
 import ru.otus.yardsportsteamlobby.repository.GameRepository;
 import ru.otus.yardsportsteamlobby.repository.PlayerRepository;
 import ru.otus.yardsportsteamlobby.repository.TeamRepository;
-import ru.otus.yardsportsteamlobby.rest.response.game.ListGameResponse;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -38,26 +35,20 @@ public class GameService {
 
     private final TeamRepository teamRepository;
 
-    private List<GameDto> cachedGameList = new ArrayList<>(0);
-
     private GameDto cachedGameDto = new GameDto();
 
-    @HystrixCommand(commandKey = "gameServiceTimeout", fallbackMethod = "gameNotCreated")
-    public Game saveGame(LocalDateTime gameDateTime, Game game) {
+    public Game saveGame(Game game) {
         return gameRepository.save(game);
     }
 
-    @HystrixCommand(commandKey = "gameServiceTimeout", fallbackMethod = "cachedGamesList")
-    public ListGameResponse gameList(int howManyGames) {
+    @Transactional
+    public List<GameDto> gameList(int howManyGames) {
         final var pageRequest = PageRequest.of(0, howManyGames, Sort.Direction.ASC, "gameDateTime");
-        final var lastGames = gameRepository.findAllByStatus(GameStatus.EXPECTED, pageRequest).stream()
+        return gameRepository.findAllByStatus(GameStatus.EXPECTED, pageRequest).stream()
                 .map(GameDto::toDto)
                 .collect(Collectors.toList());
-        cachedGameList = lastGames;
-        return new ListGameResponse(lastGames);
     }
 
-    @HystrixCommand(commandKey = "gameServiceTimeout", fallbackMethod = "cachedGameDto", ignoreExceptions = {HttpClientErrorException.class})
     public GameDto signUpForGame(long gameId, long teamId, long userId) {
         final var selectedGame = gameRepository.findById(gameId);
         cachedGameDto = selectedGame.map(GameDto::toDto).orElse(new GameDto());
@@ -92,33 +83,11 @@ public class GameService {
                 .orElse(cachedGameDto);
     }
 
-    public GameDto getCachedGameDto() {
-        return cachedGameDto;
-    }
-
     private Team selectOtherTeamFromGame(Game game, long selectedTeamId) {
         if (game.getTeamA().getId() == selectedTeamId) {
             return game.getTeamB();
         } else {
             return game.getTeamA();
         }
-    }
-
-    private Game gameNotCreated(LocalDateTime gameDateTime, Game game) {
-        log.info("Hystrix default response gameNotCreated");
-        log.info("Game was not created on {}, try again later.", gameDateTime);
-        return new Game();
-    }
-
-    private ListGameResponse cachedGamesList(int howManyGames) {
-        log.info("Hystrix default response cachedGamesList");
-        final var response = new ListGameResponse();
-        response.setGames(cachedGameList);
-        return response;
-    }
-
-    private GameDto cachedGameDto(long gameId, long teamId, long userId) {
-        log.info("Hystrix default response cachedGameDto: gameId {}, teamId {}, userId {}", gameId, teamId, userId);
-        return cachedGameDto;
     }
 }

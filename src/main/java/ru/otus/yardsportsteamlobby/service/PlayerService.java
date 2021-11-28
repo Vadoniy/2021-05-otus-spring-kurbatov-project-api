@@ -1,6 +1,5 @@
 package ru.otus.yardsportsteamlobby.service;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,6 @@ public class PlayerService {
     private final UserRepository userRepository;
 
     @Transactional
-    @HystrixCommand(commandKey = "playerServiceTimeout", fallbackMethod = "notRegistered")
     public Player savePlayer(Player player) {
         if (playerRepository.existsByUserId(player.getUserId())) {
             player = playerRepository.findOneByUserId(player.getUserId())
@@ -36,7 +34,7 @@ public class PlayerService {
         return player;
     }
 
-    @HystrixCommand(commandKey = "playerServiceTimeout", fallbackMethod = "notDeleted")
+    @Transactional
     public String deletePlayer(Long userId) {
         if (playerRepository.existsByUserId(userId)) {
             playerRepository.deleteByUserId(userId);
@@ -57,15 +55,5 @@ public class PlayerService {
                     .setPassword(String.valueOf(userId).toCharArray())
                     .setRole(PlayerAuthority.USER));
         }
-    }
-
-    private String notDeleted(Long userId) {
-        log.info("Hystrix default response notDeleted for userId {}", userId);
-        return PlayerAuthority.USER.name();
-    }
-
-    private Player notRegistered(Player player) {
-        log.info("Hystrix default response notRegistered for userId {}", player.getUserId());
-        return new Player();
     }
 }

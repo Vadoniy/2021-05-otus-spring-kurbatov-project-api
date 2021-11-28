@@ -1,6 +1,5 @@
 package ru.otus.yardsportsteamlobby.service;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,7 +15,6 @@ public class MyUserService {
 
     private final UserRepository userRepository;
 
-    @HystrixCommand(commandKey = "userControllerTimeout", fallbackMethod = "defaultRole")
     public String loadUsersRole(Long userId) {
         try {
             return userRepository.findByUserId(userId)
@@ -27,10 +25,5 @@ public class MyUserService {
             log.error(e.getMessage());
             return PlayerAuthority.NEW.name();
         }
-    }
-
-    private String defaultRole(Long userId) {
-        log.info("Hystrix default response for userId {}, returned rol is NEW", userId);
-        return PlayerAuthority.NEW.name();
     }
 }

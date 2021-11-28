@@ -7,16 +7,16 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.otus.yardsportsteamlobby.domain.Player;
 import ru.otus.yardsportsteamlobby.rest.request.player.CreatePlayerRequest;
-import ru.otus.yardsportsteamlobby.service.MyUserService;
-import ru.otus.yardsportsteamlobby.service.PlayerService;
+import ru.otus.yardsportsteamlobby.service.hystrix.HystrixMyUserService;
+import ru.otus.yardsportsteamlobby.service.hystrix.HystrixPlayerService;
 
 @RestController
 @RequiredArgsConstructor
 public class PlayerRestController {
 
-    private final PlayerService playerService;
+    private final HystrixPlayerService hystrixPlayerService;
 
-    private final MyUserService myUserService;
+    private final HystrixMyUserService hystrixMyUserService;
 
     @PostMapping("/player/new")
     public ResponseEntity<String> registerPlayer(@Validated @RequestBody CreatePlayerRequest createPlayerRequest) {
@@ -26,14 +26,14 @@ public class PlayerRestController {
                 .setPhone(createPlayerRequest.getPhone())
                 .setPlayerNumber(createPlayerRequest.getNumber())
                 .setPosition(createPlayerRequest.getPosition());
-        final var savedPlayer = playerService.savePlayer(player);
-        final var response = myUserService.loadUsersRole(savedPlayer.getUserId());
+        final var savedPlayer = hystrixPlayerService.savePlayer(player);
+        final var response = hystrixMyUserService.loadUsersRole(savedPlayer.getUserId());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/player/{userId}")
     public ResponseEntity<String> deletePlayer(@PathVariable String userId) {
-        final var response = playerService.deletePlayer(Long.parseLong(userId));
+        final var response = hystrixPlayerService.deletePlayer(Long.parseLong(userId));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
