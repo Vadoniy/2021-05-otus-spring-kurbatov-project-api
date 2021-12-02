@@ -1,0 +1,8 @@
+#spring:
+#  datasource:
+#    driverClassName: org.h2.Driver
+#    properties.hibernate.jdbc.lob.non_contextual_creation: true
+#    url: jdbc:h2:mem:test
+
+spring:
+  liquibase.enabled: false

@@ -44,6 +44,9 @@ databaseChangeLog:
           - column:
               name: state
               type: varchar(20)
+          - column:
+              name: role
+              type: varchar(255)
   - changeSet:
       id: 2021-11-01--0002
       author: vadony
@@ -116,3 +119,118 @@ databaseChangeLog:
               type: bigint
               constraints:
                 nullable: false
+  - changeSet:
+      id: 2021-11-15--0005
+      author: vadony
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames:  team_id
+            baseTableName:  PLAYER_TEAM
+            constraintName:  fk_player_team_team
+            onDelete:  CASCADE
+            referencedColumnNames:  id
+            referencedTableName:  TEAM
+        - addForeignKeyConstraint:
+            baseColumnNames:  player_id
+            baseTableName:  PLAYER_TEAM
+            constraintName:  fk_player_team_player
+            onDelete:  CASCADE
+            referencedColumnNames:  id
+            referencedTableName:  PLAYER
+        - addForeignKeyConstraint:
+            baseColumnNames:  team_a_id
+            baseTableName:  GAME
+            constraintName:  fk_game_team_a
+            onDelete:  CASCADE
+            referencedColumnNames:  id
+            referencedTableName:  TEAM
+        - addForeignKeyConstraint:
+            baseColumnNames:  team_b_id
+            baseTableName:  GAME
+            constraintName:  fk_game_team_b
+            onDelete:  CASCADE
+            referencedColumnNames:  id
+            referencedTableName:  TEAM
+  - changeSet:
+      id: 2021-11-21--0006
+      author: vadony
+      createTable:
+        tableName: MY_USER
+        columns:
+          - column:
+              name: id
+              type: bigint
+              autoIncrement: true
+              constraints:
+                nullable: false
+                primaryKey: true
+                primaryKeyName: pk_my_user
+          - column:
+              name: user_id
+              type: bigint
+              constraints:
+                nullable: false
+          - column:
+              name: password
+              type: varchar(255)
+          - column:
+              name: role
+              type: varchar(255)
+  - changeSet:
+      id: 2021-11-21--0007
+      author: vadony
+      changes:
+        - insert:
+            columns:
+              - column:
+                  name: user_id
+                  value: 251825356
+              - column:
+                  name: name
+                  value: Вадим
+              - column:
+                  name: phone
+                  value: 79257894513
+              - column:
+                  name: player_number
+                  value: 17
+              - column:
+                  name: position
+                  value: FIELD
+              - column:
+                  name: is_disqualified
+                  value: false
+              - column:
+                  name: state
+                  value: ACTIVE
+              - column:
+                  name: role
+                  value: ADMIN
+            tableName:  PLAYER
+  - changeSet:
+      id: 2021-11-21--0008
+      author: vadony
+      changes:
+        - insert:
+            columns:
+              - column:
+                  name: user_id
+                  value: 251825356
+              - column:
+                  name: password
+                  value: 251825356
+              - column:
+                  name: role
+                  value: ADMIN
+            tableName:  MY_USER
+  - changeSet:
+      id: 2021-11-21--0009
+      author: vadony
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: MY_USER
+            constraintName: fk_my_user_player
+            onDelete: CASCADE
+            referencedColumnNames: user_id
+            referencedTableName: PLAYER

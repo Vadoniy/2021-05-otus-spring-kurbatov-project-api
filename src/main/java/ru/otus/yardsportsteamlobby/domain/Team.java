@@ -27,7 +27,7 @@ public class Team {
     @NotBlank
     private String teamName;
 
-    @ManyToMany(targetEntity = Player.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(targetEntity = Player.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "player_team", joinColumns = @JoinColumn(name = "team_id"),
             inverseJoinColumns = @JoinColumn(name = "player_id"))
     private Set<Player> lineUp = new HashSet<>();

@@ -1,25 +1,30 @@
 package ru.otus.yardsportsteamlobby.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import ru.otus.yardsportsteamlobby.configuration.BusinessConfiguration;
 import ru.otus.yardsportsteamlobby.domain.Game;
 import ru.otus.yardsportsteamlobby.domain.Team;
 import ru.otus.yardsportsteamlobby.dto.GameDto;
+import ru.otus.yardsportsteamlobby.enums.GameStatus;
 import ru.otus.yardsportsteamlobby.repository.GameRepository;
 import ru.otus.yardsportsteamlobby.repository.PlayerRepository;
 import ru.otus.yardsportsteamlobby.repository.TeamRepository;
-import ru.otus.yardsportsteamlobby.rest.response.game.ListGameResponse;
-import ru.otus.yardsportsteamlobby.rest.response.game.SignUpForGameResponse;
 
 import javax.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GameService {
 
     private final BusinessConfiguration businessConfiguration;
@@ -30,29 +35,37 @@ public class GameService {
 
     private final TeamRepository teamRepository;
 
-    @Transactional
+    private GameDto cachedGameDto = new GameDto();
+
     public Game saveGame(Game game) {
         return gameRepository.save(game);
     }
 
-    public ListGameResponse gameList(int howManyGames) {
+    @Transactional
+    public List<GameDto> gameList(int howManyGames) {
         final var pageRequest = PageRequest.of(0, howManyGames, Sort.Direction.ASC, "gameDateTime");
-        final var lastGames = gameRepository.findAll(pageRequest).stream()
+        return gameRepository.findAllByStatus(GameStatus.EXPECTED, pageRequest).stream()
                 .map(GameDto::toDto)
                 .collect(Collectors.toList());
-        return new ListGameResponse(lastGames);
     }
 
-    public SignUpForGameResponse signUpForGame(long gameId, long teamId, long userId) {
+    public GameDto signUpForGame(long gameId, long teamId, long userId) {
         final var selectedGame = gameRepository.findById(gameId);
+        cachedGameDto = selectedGame.map(GameDto::toDto).orElse(new GameDto());
         final var selectedTeam = teamRepository.findById(teamId);
-        final var selectedPlayer = playerRepository.findOneByUserId(userId);
+        final var selectedPlayer = Optional.ofNullable(playerRepository.findOneByUserId(userId))
+                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.MULTI_STATUS));
         final var selectedGameCapacity = selectedGame.map(Game::getTeamCapacity).orElse(businessConfiguration.getCapacity());
-        final var signUpForGameResponse = new SignUpForGameResponse();
-        final int errorCode;
-        if (selectedTeam.map(Team::getLineUp).map(Set::size).orElse(0) >= selectedGameCapacity) {
-            errorCode = 2;
-            //TODO select other team
+        final var otherTeam = selectOtherTeamFromGame(selectedGame.orElseThrow(), teamId);
+        if (selectedPlayer == null) {
+            return cachedGameDto;
+        }
+        if (selectedTeam.map(Team::getLineUp).map(Set::size).orElse(0) >= selectedGameCapacity
+                && selectedTeam.map(Team::getLineUp).map(players -> !players.contains(selectedPlayer)).orElse(Boolean.TRUE)) {
+            if (otherTeam.getLineUp().size() <= selectedGameCapacity) {
+                throw new HttpClientErrorException(HttpStatus.ALREADY_REPORTED);
+            }
+            throw new HttpClientErrorException(HttpStatus.NO_CONTENT);
         } else {
             selectedGame.map(game -> {
                 if (game.getTeamA().getId() == teamId) {
@@ -62,20 +75,16 @@ public class GameService {
                 }
             })
                     .map(Team::getLineUp)
-                    .ifPresent(players -> {
-                        players.add(selectedPlayer);
-                    });
-            errorCode = 1;
+                    .ifPresent(players -> players.add(selectedPlayer));
+            otherTeam.getLineUp().remove(selectedPlayer);
         }
-        final var savedGame = selectedGame.map(gameRepository::save);
-        savedGame.map(GameDto::toDto)
-                .ifPresentOrElse(signUpForGameResponse::setGameDto, () ->
-                        signUpForGameResponse.setErrorCode(errorCode));
-        return signUpForGameResponse;
+        return selectedGame.map(gameRepository::save)
+                .map(GameDto::toDto)
+                .orElse(cachedGameDto);
     }
 
-    private Team selectAnotherTeamFromGame(Game game, long teamId) {
-        if (game.getTeamA().getId() == teamId) {
+    private Team selectOtherTeamFromGame(Game game, long selectedTeamId) {
+        if (game.getTeamA().getId() == selectedTeamId) {
             return game.getTeamB();
         } else {
             return game.getTeamA();

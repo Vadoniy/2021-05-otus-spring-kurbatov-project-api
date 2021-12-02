@@ -4,7 +4,6 @@ business:
     team-name-b: Белые
     capacity: 6
 
-
 spring:
   datasource:
     username: postgres
@@ -15,7 +14,21 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
   liquibase:
     change-log: db\changelog\db.changelog-master.yml
   mvc.hiddenmethod.filter.enabled: true
+  logging:
+    level:
+      root: debug
+      org.springframework.security: DEBUG
+      org.springframework: debug
+
+hystrix:
+  command:
+    gameServiceTimeout:
+      execution.isolation.thread.timeoutInMilliseconds: 3000
+    playerServiceTimeout:
+      execution.isolation.thread.timeoutInMilliseconds: 3000
+    userControllerTimeout:
+      execution.isolation.thread.timeoutInMilliseconds: 3000
