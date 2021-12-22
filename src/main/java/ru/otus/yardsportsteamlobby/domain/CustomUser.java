@@ -14,8 +14,8 @@ import javax.validation.constraints.NotNull;
 //@EqualsAndHashCode(of = "id")
 @Accessors(chain = true)
 @Entity
-@Table(name = "MY_USER")
-public class MyUser {
+@Table(name = "CUSTOM_USER")
+public class CustomUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +28,7 @@ public class MyUser {
     private char[] password;
 
     @Enumerated(EnumType.STRING)
-    private PlayerAuthority role;
+    private PlayerAuthority authority;
 }
 
 

@@ -27,7 +27,7 @@ public class HystrixPlayerService {
 
     private Player notRegistered(Player player) {
         log.info("Hystrix default response notRegistered for userId {}", player.getUserId());
-        return new Player().setRole(PlayerAuthority.NEW).setUserId(player.getUserId());
+        return new Player().setAuthority(PlayerAuthority.NEW).setUserId(player.getUserId());
     }
 
     private String notDeleted(Long userId) {

@@ -3,7 +3,7 @@ package ru.otus.yardsportsteamlobby.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.otus.yardsportsteamlobby.domain.MyUser;
+import ru.otus.yardsportsteamlobby.domain.CustomUser;
 import ru.otus.yardsportsteamlobby.domain.Player;
 import ru.otus.yardsportsteamlobby.enums.PlayerAuthority;
 import ru.otus.yardsportsteamlobby.repository.PlayerRepository;
@@ -45,15 +45,15 @@ public class PlayerService {
         return PlayerAuthority.NEW.name();
     }
 
-    private MyUser saveUser(Long userId) {
+    private CustomUser saveUser(Long userId) {
         if (userRepository.existsByUserId(userId)) {
             return userRepository.findByUserId(userId)
                     .orElseThrow();
         } else {
-            return userRepository.save(new MyUser()
+            return userRepository.save(new CustomUser()
                     .setUserId(userId)
                     .setPassword(String.valueOf(userId).toCharArray())
-                    .setRole(PlayerAuthority.USER));
+                    .setAuthority(PlayerAuthority.USER));
         }
     }
 }

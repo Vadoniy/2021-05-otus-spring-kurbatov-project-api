@@ -35,8 +35,6 @@ public class GameService {
 
     private final TeamRepository teamRepository;
 
-    private GameDto cachedGameDto = new GameDto();
-
     public Game saveGame(Game game) {
         return gameRepository.save(game);
     }
@@ -51,7 +49,7 @@ public class GameService {
 
     public GameDto signUpForGame(long gameId, long teamId, long userId) {
         final var selectedGame = gameRepository.findById(gameId);
-        cachedGameDto = selectedGame.map(GameDto::toDto).orElse(new GameDto());
+        final var cachedGameDto = selectedGame.map(GameDto::toDto).orElse(new GameDto());
         final var selectedTeam = teamRepository.findById(teamId);
         final var selectedPlayer = Optional.ofNullable(playerRepository.findOneByUserId(userId))
                 .orElseThrow(() -> new HttpClientErrorException(HttpStatus.MULTI_STATUS));

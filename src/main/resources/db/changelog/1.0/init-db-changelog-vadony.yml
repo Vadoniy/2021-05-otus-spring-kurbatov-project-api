@@ -155,7 +155,7 @@ databaseChangeLog:
       id: 2021-11-21--0006
       author: vadony
       createTable:
-        tableName: MY_USER
+        tableName: CUSTOM_USER
         columns:
           - column:
               name: id
@@ -164,7 +164,7 @@ databaseChangeLog:
               constraints:
                 nullable: false
                 primaryKey: true
-                primaryKeyName: pk_my_user
+                primaryKeyName: pk_custom_user
           - column:
               name: user_id
               type: bigint
@@ -222,15 +222,15 @@ databaseChangeLog:
               - column:
                   name: role
                   value: ADMIN
-            tableName:  MY_USER
+            tableName:  CUSTOM_USER
   - changeSet:
       id: 2021-11-21--0009
       author: vadony
       changes:
         - addForeignKeyConstraint:
             baseColumnNames: user_id
-            baseTableName: MY_USER
-            constraintName: fk_my_user_player
+            baseTableName: CUSTOM_USER
+            constraintName: fk_custom_user_player
             onDelete: CASCADE
             referencedColumnNames: user_id
             referencedTableName: PLAYER

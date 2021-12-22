@@ -27,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return userRepository.findByUserId(Long.parseLong(userId))
                 .map(u -> new User(
                         String.valueOf(u.getUserId()), new BCryptPasswordEncoder().encode(String.valueOf(u.getUserId())),
-                        AuthorityUtils.createAuthorityList(u.getRole().name())))
+                        AuthorityUtils.createAuthorityList(u.getAuthority().name())))
                 .orElse(new User(userId, passwordEncoder.encode(userId),
                         AuthorityUtils.createAuthorityList(PlayerAuthority.NEW.name())));
     }

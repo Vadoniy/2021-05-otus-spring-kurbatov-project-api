@@ -5,18 +5,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.otus.yardsportsteamlobby.enums.PlayerAuthority;
-import ru.otus.yardsportsteamlobby.service.MyUserService;
+import ru.otus.yardsportsteamlobby.service.CustomUserService;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class HystrixMyUserService {
+public class HystrixCustomUserService {
 
-    private final MyUserService myUserService;
+    private final CustomUserService customUserService;
 
     @HystrixCommand(commandKey = "userControllerTimeout", fallbackMethod = "defaultRole")
     public String loadUsersRole(Long userId) {
-        return myUserService.loadUsersRole(userId);
+        return customUserService.loadUsersRole(userId);
     }
 
     private String defaultRole(Long userId) {

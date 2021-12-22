@@ -6,16 +6,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import ru.otus.yardsportsteamlobby.service.hystrix.HystrixMyUserService;
+import ru.otus.yardsportsteamlobby.service.hystrix.HystrixCustomUserService;
 
 @RestController
 @RequiredArgsConstructor
 public class UserController {
 
-    private final HystrixMyUserService hystrixMyUserService;
+    private final HystrixCustomUserService hystrixCustomUserService;
 
     @GetMapping("/user/role/{userId}")
     public ResponseEntity<String> getUsersRole(@PathVariable long userId) {
-        return new ResponseEntity<>(hystrixMyUserService.loadUsersRole(userId), HttpStatus.OK);
+        return new ResponseEntity<>(hystrixCustomUserService.loadUsersRole(userId), HttpStatus.OK);
     }
 }

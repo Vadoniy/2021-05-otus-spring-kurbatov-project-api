@@ -7,7 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.otus.yardsportsteamlobby.domain.Player;
 import ru.otus.yardsportsteamlobby.rest.request.player.CreatePlayerRequest;
-import ru.otus.yardsportsteamlobby.service.hystrix.HystrixMyUserService;
+import ru.otus.yardsportsteamlobby.service.hystrix.HystrixCustomUserService;
 import ru.otus.yardsportsteamlobby.service.hystrix.HystrixPlayerService;
 
 @RestController
@@ -16,7 +16,7 @@ public class PlayerRestController {
 
     private final HystrixPlayerService hystrixPlayerService;
 
-    private final HystrixMyUserService hystrixMyUserService;
+    private final HystrixCustomUserService hystrixCustomUserService;
 
     @PostMapping("/player/new")
     public ResponseEntity<String> registerPlayer(@Validated @RequestBody CreatePlayerRequest createPlayerRequest) {
@@ -27,7 +27,7 @@ public class PlayerRestController {
                 .setPlayerNumber(createPlayerRequest.getNumber())
                 .setPosition(createPlayerRequest.getPosition());
         final var savedPlayer = hystrixPlayerService.savePlayer(player);
-        final var response = hystrixMyUserService.loadUsersRole(savedPlayer.getUserId());
+        final var response = hystrixCustomUserService.loadUsersRole(savedPlayer.getUserId());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
