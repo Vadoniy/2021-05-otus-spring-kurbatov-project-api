@@ -10,6 +10,6 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleNotValidRequests() {
-        return ResponseEntity.badRequest().body("Wrong arguments, check yur request please.");
+        return ResponseEntity.badRequest().body("Wrong arguments, check your request please.");
     }
 }
