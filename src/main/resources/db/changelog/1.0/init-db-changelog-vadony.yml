@@ -45,7 +45,7 @@ databaseChangeLog:
               name: state
               type: varchar(20)
           - column:
-              name: role
+              name: authority
               type: varchar(255)
   - changeSet:
       id: 2021-11-01--0002
@@ -174,7 +174,7 @@ databaseChangeLog:
               name: password
               type: varchar(255)
           - column:
-              name: role
+              name: authority
               type: varchar(255)
   - changeSet:
       id: 2021-11-21--0007
@@ -204,7 +204,7 @@ databaseChangeLog:
                   name: state
                   value: ACTIVE
               - column:
-                  name: role
+                  name: authority
                   value: ADMIN
             tableName:  PLAYER
   - changeSet:
@@ -220,7 +220,7 @@ databaseChangeLog:
                   name: password
                   value: 251825356
               - column:
-                  name: role
+                  name: authority
                   value: ADMIN
             tableName:  CUSTOM_USER
   - changeSet:
